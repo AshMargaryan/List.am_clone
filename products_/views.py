@@ -2,6 +2,7 @@ from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView, C
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 from .serializers import ProductSerializer
 from .models import Product
@@ -11,6 +12,8 @@ from .permissions import IsAuthorOrReadOnly
 class ProductListView(ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['title', 'author__username', 'category', 'subcategory']
 
 
 class ProductDetailView(RetrieveUpdateDestroyAPIView):
