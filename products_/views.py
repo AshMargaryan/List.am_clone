@@ -1,11 +1,11 @@
 from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from .serializers import ProductSerializer
-from .models import Product
+from .serializers import ProductSerializer, CategorySerializer, SubCategorySerializer
+from .models import Product, Category, SubCategory
 from .permissions import IsAuthorOrReadOnly
 
 
@@ -30,26 +30,35 @@ class PostProductView(CreateAPIView):
 
 class CategoryProduct(ListAPIView):
     def get_queryset(self):
-        self.category = self.kwargs['cat']
-        queryset = Product.objects.filter(category=self.category)
+        self.category_name = self.kwargs['cat']
+        queryset = Category.objects.filter(name=self.category_name)
         return queryset
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        serializer_class = ProductSerializer(queryset, many=True)
+        serializer_class = CategorySerializer(queryset, many=True)
         return Response(serializer_class.data)
 
 class SubCategoryProduct(ListAPIView):
     def get_queryset(self):
-        self.category = self.kwargs['cat']
-        self.subcategory = self.kwargs['subcat']
-        queryset = Product.objects.filter(category=self.category, subcategory=self.subcategory)
+        self.subcategory_name = self.kwargs['subcat']
+        queryset = SubCategory.objects.filter(name=self.subcategory_name)
         return queryset
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        serializer_class = ProductSerializer(queryset, many=True)
+        serializer_class = SubCategorySerializer(queryset, many=True)
         return Response(serializer_class.data)
 
+
+class CreateCategory(CreateAPIView):
+    permission_classes = (IsAuthenticated, IsAdminUser)
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+class CreateSubCategory(CreateAPIView):
+    permission_classes = (IsAuthenticated, IsAdminUser)
+    queryset = SubCategory.objects.all()
+    serializer_class = SubCategorySerializer
 
 

@@ -1,8 +1,18 @@
-from rest_framework.serializers import ModelSerializer, ListField, ImageField
+from rest_framework.serializers import ModelSerializer, ListField, ImageField, PrimaryKeyRelatedField
 
-from .models import Product, ProductImage
+from .models import Product, ProductImage, Category, SubCategory
 
-class ProductImageSerializer(ModelSerializer):
+
+class SubCategorySerializer(ModelSerializer):
+    class Meta:
+        model = SubCategory
+        fields = ('category', 'name', 'description')
+class CategorySerializer(ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ('name', 'description')
+
+class ProductImageSerializer(PrimaryKeyRelatedField, ModelSerializer):
     class Meta:
         model = ProductImage
         fields = "__all__"
@@ -11,7 +21,7 @@ class ProductImageSerializer(ModelSerializer):
 class ProductSerializer(ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     uploaded_images = ListField(
-        child=ImageField(max_length=100000, allow_empty_file=False, use_url=False),
+        child=ImageField(max_length=100000, allow_empty_file=True, use_url=False),
         write_only=True
     )
     class Meta:
